@@ -9,7 +9,7 @@ const fs = require('fs')
 // Sets up the Express App
 
 const app = express();
-const PORT = process.env.PORT || 3000; //added so that Heroku can use a dynamic port.
+const PORT = 3000; //added so that Heroku can use a dynamic port.
 
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -79,6 +79,10 @@ const displayReserve = (res) => {
         res.end(data);
     });
 };
+
+const dispWait = (res)  =>  {
+    res.json(waitList)
+}
 const display404 = (url, res) => {
     const myHTML = `
     <html>
@@ -94,6 +98,8 @@ const display404 = (url, res) => {
     // End the response by sending the client the myHTML string (which gets rendered as an HTML document thanks to the code above)
     res.end(myHTML);
 };
+
+
 const handleRequest = (req, res) => {
     // Capture the url the request is made to
     const path = req.url;
@@ -103,31 +109,40 @@ const handleRequest = (req, res) => {
         case '/':
         case '/home':
             return displayHome(res);
-        
-
 
         case '/tables':
             return displayTables(res);
 
         case '/reserve':
             return displayReserve(res);
+        case '/api/waitlist':
+            return dispWait(res);
+
 
         default:
             return display404(path, res);
     }
 };
 
-// Assign our createServer method to a variable called "server"
-const server = http.createServer(handleRequest);
+
+
+
 
 // Routes
 
+//HTML Routes
 
-// Displays everyone on the waitlist
+app.get('/', (req, res) => displayHome(res));
+app.get('/home', (req, res) => displayHome(res));
+app.get('/tables', (req, res) => displayTables(res));
+app.get('/reserve', (req, res) => displayReserve(res));
+
+//API Routes
+//Displays the waitlist
 app.get('/api/waitlist', (req, res) => res.json(waitList));
 
-// Displays everyone on the reservation list
-app.get('/api/reserve', (req, res) => res.json(resList));
+// Displays the reservation tables
+app.get('/api/tables', (req, res) => res.json(resList));
 
 
 // Create New Reservation - takes in JSON input
@@ -149,3 +164,4 @@ app.post('/api/tables', (req, res) => {
 // Starts the server to begin listening
 
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
+
